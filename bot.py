@@ -279,7 +279,7 @@ def auto_update():
                     bot.send_message(user_chat_id, f"🔄 {data}")
             except Exception as e:
                 print(f"Помилка автооновлення: {e}")
-        time.sleep(300)
+        time.sleep(43200)
 
 # Запускаємо автооновлення в окремому потоці
 threading.Thread(target=auto_update, daemon=True).start()
