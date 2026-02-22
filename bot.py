@@ -6,10 +6,18 @@ from dotenv import load_dotenv
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 import threading
 
+
+
 load_dotenv()
 
 TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(TOKEN)
+
+# Додай це відразу після створення бота
+bot.remove_webhook()
+import time
+time.sleep(1)  # Невелика пауза
+
 
 # Перемінна для збереження правильного chat_id
 user_chat_id = 698035711
@@ -282,8 +290,22 @@ def auto_update():
         time.sleep(43200)
 
 # Запускаємо автооновлення в окремому потоці
-threading.Thread(target=auto_update, daemon=True).start()
-
-print("✅ Бот запущено...")
- 
-bot.infinity_polling()
+def start_bot():
+    # Спочатку скидаємо всі апдейти
+    try:
+        bot.remove_webhook()
+        updates = bot.get_updates()
+        if updates:
+            last_id = updates[-1].update_id
+            bot.get_updates(offset=last_id + 1)
+        print("✅ Історія апдейтів очищена")
+    except Exception as e:
+        print(f"⚠️ {e}")
+    
+    while True:
+        try:
+            bot.infinity_polling(timeout=60, long_polling_timeout=60, skip_pending=True)
+        except Exception as e:
+            print(f"❌ Помилка: {e}")
+            time.sleep(5)
+            continue
